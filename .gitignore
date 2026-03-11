@@ -1,0 +1,101 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# Environment variables
+.env
+.env.local
+
+# Node
+node_modules/
+.next/
+out/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+# Business App
+business-app/dist/
+business-app/.env
+business-app/.env.local
+
+# Client App (frontend-vite)
+frontend-vite/dist/
+frontend-vite/.env
+frontend-vite/.env.local
+
+# Admin App
+admin-app/dist/
+admin-app/.env
+admin-app/.env.local
+
+# Backend Python
+backend/venv/
+backend/.env
+backend/db.sqlite3
+backend/__pycache__/
+backend/*/__pycache__/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Package lock files (já temos node_modules, mas específico)
+package-lock.json
+yarn.lock
+
+# Build artifacts
+build/
+dist/
+out/
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/

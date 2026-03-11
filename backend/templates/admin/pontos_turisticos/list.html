@@ -1,0 +1,102 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | Django Admin{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module" style="margin-bottom: 20px;">
+        <h1>{{ title }}</h1>
+        
+        <!-- Estatísticas -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 20px 0;">
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #0EA5E9;">
+                <div style="font-size: 24px; font-weight: bold; color: #0EA5E9;">{{ stats.total }}</div>
+                <div style="color: #666; font-size: 14px;">Total de Pontos</div>
+            </div>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #F97316;">
+                <div style="font-size: 24px; font-weight: bold; color: #F97316;">{{ stats.praias }}</div>
+                <div style="color: #666; font-size: 14px;">Praias</div>
+            </div>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #10B981;">
+                <div style="font-size: 24px; font-weight: bold; color: #10B981;">{{ stats.restaurantes }}</div>
+                <div style="color: #666; font-size: 14px;">Restaurantes</div>
+            </div>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #8B5CF6;">
+                <div style="font-size: 24px; font-weight: bold; color: #8B5CF6;">{{ stats.hoteis }}</div>
+                <div style="color: #666; font-size: 14px;">Hotéis</div>
+            </div>
+        </div>
+        
+        <!-- Botão Adicionar -->
+        <div style="margin: 20px 0;">
+            <a href="{% url 'admin:pontos_add' %}" class="addlink" style="background: #0EA5E9; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-block;">
+                Adicionar Ponto Turístico
+            </a>
+        </div>
+        
+        <!-- Tabela -->
+        <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+            <thead style="background: #f8f9fa;">
+                <tr>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Imagem</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Nome</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Categoria</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Localização</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Reviews</th>
+                    <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ponto in pontos %}
+                <tr style="border-bottom: 1px solid #dee2e6;">
+                    <td style="padding: 12px;">
+                        {% if ponto.imagens %}
+                            <img src="{{ ponto.imagens.0.url }}" alt="{{ ponto.nome }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;">
+                        {% else %}
+                            <div style="width: 60px; height: 60px; background: #e9ecef; border-radius: 5px; display: flex; align-items: center; justify-content: center; color: #6c757d;">
+                                Sem imagem
+                            </div>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 12px;">
+                        <strong>{{ ponto.nome }}</strong><br>
+                        <small style="color: #666;">{{ ponto.descricao|truncatewords:10 }}</small>
+                    </td>
+                    <td style="padding: 12px;">
+                        <span style="background: #0EA5E9; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px;">
+                            {{ ponto.categoria }}
+                        </span>
+                    </td>
+                    <td style="padding: 12px;">
+                        <small style="color: #666;">
+                            {{ ponto.localizacao.coordinates.1|floatformat:4 }}, {{ ponto.localizacao.coordinates.0|floatformat:4 }}
+                        </small>
+                    </td>
+                    <td style="padding: 12px;">
+                        {{ ponto.reviews|length }} avaliações
+                    </td>
+                    <td style="padding: 12px; text-align: center;">
+                        <a href="{% url 'admin:pontos_change' ponto._id %}" style="color: #0EA5E9; text-decoration: none; margin-right: 10px;">
+                            ✏️ Editar
+                        </a>
+                        <form method="post" action="{% url 'admin:pontos_delete' ponto._id %}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja deletar este ponto?');">
+                            {% csrf_token %}
+                            <button type="submit" style="background: none; border: none; color: #dc3545; cursor: pointer; text-decoration: underline;">
+                                🗑️ Deletar
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="padding: 40px; text-align: center; color: #666;">
+                        Nenhum ponto turístico cadastrado. <a href="{% url 'admin:pontos_add' %}">Adicione o primeiro!</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
