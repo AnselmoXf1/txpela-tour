@@ -69,7 +69,7 @@ sudo chown -R $USER:$USER /var/www/txopela
 
 # Clonar o repositório
 cd /var/www/txopela
-git clone [URL_DO_SEU_REPOSITORIO] .
+git clone https://github.com/AnselmoXf1/txpela-tour.git .
 ```
 
 ## 3. CONFIGURAÇÃO DO BACKEND

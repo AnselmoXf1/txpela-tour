@@ -1,0 +1,85 @@
+# CONFIGURAÇÃO DE AMBIENTE PARA VPS
+# Arquivo: /var/www/txopela/backend/.env
+
+# Django
+SECRET_KEY=sua-chave-secreta-aqui-32-caracteres
+DEBUG=False
+ALLOWED_HOSTS=75.119.133.19,localhost,127.0.0.1
+
+# Banco de Dados (MongoDB Atlas)
+MONGODB_URI=mongodb+srv://txopito-ADMIN:txopitoAdmin12@cluster0.bt5at8j.mongodb.net/?appName=Cluster0
+MONGODB_DB_NAME=txopito_ia_db
+
+# Google Gemini AI
+GEMINI_API_KEY=AIzaSyBeusp4cuMC709uuQ1ZfpQzdK4sdp6GP2Y
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=dozv8vbuc
+CLOUDINARY_API_KEY=466684533682764
+CLOUDINARY_API_SECRET=sr7corAilOWbuoowREg5cWW67G0
+
+# CORS
+CORS_ALLOWED_ORIGINS=http://75.119.133.19,http://localhost:5173
+CORS_ALLOW_CREDENTIALS=True
+
+# Email (opcional)
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=seu-email@gmail.com
+EMAIL_HOST_PASSWORD=sua-senha-app
+
+# Configurações de produção
+SECURE_SSL_REDIRECT=False  # Mude para True se usar HTTPS
+SESSION_COOKIE_SECURE=False
+CSRF_COOKIE_SECURE=False
+
+# Logging
+LOG_LEVEL=INFO
+LOG_FILE=/var/log/txopela/backend.log
+
+# ============================================
+# CONFIGURAÇÃO DO FRONTEND
+# Arquivo: /var/www/txopela/frontend-vite/.env.production
+
+VITE_API_URL=http://75.119.133.19/api
+VITE_APP_NAME=Txopela Tour
+VITE_APP_VERSION=1.0.0
+
+# ============================================
+# COMANDOS PARA CONFIGURAR NO VPS:
+
+# 1. Criar diretório de logs
+sudo mkdir -p /var/log/txopela
+sudo chown -R www-data:www-data /var/log/txopela
+
+# 2. Gerar SECRET_KEY
+python3 -c "import secrets; print(secrets.token_urlsafe(32))"
+
+# 3. Testar conexão com MongoDB
+python3 -c "
+import pymongo
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+
+uri = 'mongodb+srv://txopito-ADMIN:txopitoAdmin12@cluster0.bt5at8j.mongodb.net/?appName=Cluster0'
+client = MongoClient(uri, server_api=ServerApi('1'))
+try:
+    client.admin.command('ping')
+    print('Conexão com MongoDB Atlas bem-sucedida!')
+except Exception as e:
+    print(f'Erro na conexão: {e}')
+"
+
+# 4. Testar API Gemini
+python3 -c "
+import google.generativeai as genai
+genai.configure(api_key='AIzaSyBeusp4cuMC709uuQ1ZfpQzdK4sdp6GP2Y')
+model = genai.GenerativeModel('gemini-pro')
+try:
+    response = model.generate_content('Olá')
+    print('API Gemini funcionando!')
+except Exception as e:
+    print(f'Erro na API Gemini: {e}')
+"
