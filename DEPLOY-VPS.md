@@ -1,298 +1,337 @@
-# Deploy no VPS - Txopela Tour
+# DEPLOY NO VPS - TXOPELA TOUR
 
-## 📋 Pré-requisitos do VPS
+## Informações do VPS
+- IP: 75.119.133.19
+- Sistema: Ubuntu/Debian (assumindo)
 
-### 1. Sistema Operacional
-- Ubuntu 20.04/22.04 LTS
-- 2GB RAM mínimo (4GB recomendado)
-- 20GB SSD
-- IPv4 público
+## 1. PREPARAÇÃO LOCAL
 
-### 2. Dependências a Instalar
+### 1.1. Commitar as alterações
+```bash
+# Adicionar arquivos modificados
+git add .
+
+# Commitar
+git commit -m "Fix: API Gemini REST e configurações para deploy"
+
+# Verificar status
+git status
+```
+
+### 1.2. Configurar repositório remoto (se necessário)
+```bash
+# Verificar remotos
+git remote -v
+
+# Adicionar remote (se não existir)
+git remote add origin [URL_DO_SEU_REPOSITORIO]
+```
+
+## 2. CONFIGURAÇÃO DO VPS
+
+### 2.1. Conectar ao VPS
+```bash
+ssh root@75.119.133.19
+# ou
+ssh usuario@75.119.133.19
+```
+
+### 2.2. Instalar dependências no VPS
 ```bash
 # Atualizar sistema
 sudo apt update && sudo apt upgrade -y
 
-# Instalar dependências
-sudo apt install -y python3-pip python3-venv nginx git curl
-sudo apt install -y postgresql postgresql-contrib  # Ou MySQL
-sudo apt install -y redis-server
-sudo apt install -y certbot python3-certbot-nginx
+# Instalar Python e pip
+sudo apt install python3 python3-pip python3-venv -y
 
-# Instalar Node.js 18+
+# Instalar Node.js (para frontend)
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt install -y nodejs
+sudo apt install nodejs -y
 
-# Verificar instalações
-python3 --version
-node --version
-npm --version
-nginx -v
+# Instalar Git
+sudo apt install git -y
+
+# Instalar Nginx
+sudo apt install nginx -y
+
+# Instalar PostgreSQL (opcional, se não usar SQLite)
+sudo apt install postgresql postgresql-contrib -y
+
+# Instalar supervisor para gerenciar processos
+sudo apt install supervisor -y
 ```
 
-## 🚀 Configuração do VPS
-
-### 1. Criar Usuário para Aplicação
+### 2.3. Clonar o repositório
 ```bash
-# Criar usuário
-sudo adduser txopela
-sudo usermod -aG sudo txopela
+# Criar diretório para a aplicação
+sudo mkdir -p /var/www/txopela
+sudo chown -R $USER:$USER /var/www/txopela
 
-# Logar como usuário txopela
-su - txopela
+# Clonar o repositório
+cd /var/www/txopela
+git clone [URL_DO_SEU_REPOSITORIO] .
 ```
 
-### 2. Clonar Repositório
-```bash
-cd /home/txopela
-git clone https://github.com/seu-usuario/txopela-tour.git
-cd txopela-tour
-```
+## 3. CONFIGURAÇÃO DO BACKEND
 
-### 3. Configurar Backend
+### 3.1. Configurar ambiente Python
 ```bash
-cd backend
+cd /var/www/txopela/backend
 
-# Ambiente virtual
+# Criar ambiente virtual
 python3 -m venv venv
 source venv/bin/activate
 
-# Dependências
+# Instalar dependências
+pip install --upgrade pip
 pip install -r requirements.txt
+
+# Instalar dependências adicionais (se necessário)
 pip install gunicorn psycopg2-binary
+```
 
-# Configurar .env
+### 3.2. Configurar variáveis de ambiente
+```bash
+# Copiar arquivo .env.example para .env
 cp .env.example .env
-nano .env  # Editar com suas configurações
 
-# Migrações
-python manage.py makemigrations
+# Editar o arquivo .env com suas configurações
+nano .env
+```
+
+**Configurações importantes no .env:**
+```env
+SECRET_KEY=sua-chave-secreta-aqui
+DEBUG=False
+ALLOWED_HOSTS=75.119.133.19,localhost,127.0.0.1
+
+# MongoDB Atlas (já configurado)
+MONGODB_URI=mongodb+srv://txopito-ADMIN:txopitoAdmin12@cluster0.bt5at8j.mongodb.net/?appName=Cluster0
+MONGODB_DB_NAME=txopito_ia_db
+
+# Google Gemini AI
+GEMINI_API_KEY=AIzaSyBeusp4cuMC709uuQ1ZfpQzdK4sdp6GP2Y
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=dozv8vbuc
+CLOUDINARY_API_KEY=466684533682764
+CLOUDINARY_API_SECRET=sr7corAilOWbuoowREg5cWW67G0
+
+# CORS
+CORS_ALLOWED_ORIGINS=http://75.119.133.19,http://localhost:5173
+```
+
+### 3.3. Configurar banco de dados
+```bash
+# Aplicar migrações
 python manage.py migrate
 
-# Coletar estáticos
-python manage.py collectstatic --noinput
-
-# Criar superusuário
+# Criar superusuário (opcional)
 python manage.py createsuperuser
+
+# Coletar arquivos estáticos
+python manage.py collectstatic --noinput
 ```
 
-### 4. Configurar Business App
+## 4. CONFIGURAÇÃO DO FRONTEND
+
+### 4.1. Frontend Vite (app cliente)
 ```bash
-cd ../business-app
+cd /var/www/txopela/frontend-vite
 
-# Dependências
-npm install --production
+# Instalar dependências
+npm install
 
-# Build
+# Configurar ambiente
+cp .env.example .env.production
+# Editar .env.production com as configurações do VPS
+
+# Build para produção
 npm run build
 ```
 
-### 5. Configurar Client App
+### 4.2. Admin App
 ```bash
-cd ../frontend-vite
+cd /var/www/txopela/admin-app
 
-# Dependências
-npm install --production
+# Instalar dependências
+npm install
 
-# Build
+# Configurar ambiente
+cp .env.example .env.production
+
+# Build para produção
 npm run build
 ```
 
-## 🔧 Configuração do Nginx
+### 4.3. Business App
+```bash
+cd /var/www/txopela/business-app
 
-### 1. Criar Configuração
+# Instalar dependências
+npm install
+
+# Configurar ambiente
+cp .env.example .env.production
+
+# Build para produção
+npm run build
+```
+
+## 5. CONFIGURAÇÃO DO NGINX
+
+### 5.1. Criar configuração do Nginx
 ```bash
 sudo nano /etc/nginx/sites-available/txopela
 ```
 
-### 2. Configuração Nginx
+**Conteúdo do arquivo:**
 ```nginx
 server {
     listen 80;
-    server_name seu-dominio.com www.seu-dominio.com;
-    
-    # Logs
-    access_log /var/log/nginx/txopela-access.log;
-    error_log /var/log/nginx/txopela-error.log;
-    
-    # Client App
+    server_name 75.119.133.19;
+
+    # Frontend Vite (app cliente)
     location / {
-        root /home/txopela/txopela-tour/frontend-vite/dist;
+        root /var/www/txopela/frontend-vite/dist;
         try_files $uri $uri/ /index.html;
-        
-        # Cache
-        location ~* \.(jpg|jpeg|png|gif|ico|css|js|svg|woff|woff2|ttf|eot)$ {
-            expires 1y;
-            add_header Cache-Control "public, immutable";
-        }
     }
-    
+
+    # Admin App
+    location /admin {
+        alias /var/www/txopela/admin-app/dist;
+        try_files $uri $uri/ /admin/index.html;
+    }
+
     # Business App
     location /business {
-        alias /home/txopela/txopela-tour/business-app/dist;
-        try_files $uri $uri/ /index.html;
-        
-        # Cache
-        location ~* \.(jpg|jpeg|png|gif|ico|css|js|svg|woff|woff2|ttf|eot)$ {
-            expires 1y;
-            add_header Cache-Control "public, immutable";
-        }
+        alias /var/www/txopela/business-app/dist;
+        try_files $uri $uri/ /business/index.html;
     }
-    
-    # Django API
+
+    # Backend API
     location /api {
         proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # Timeouts
-        proxy_connect_timeout 75s;
-        proxy_send_timeout 300s;
-        proxy_read_timeout 300s;
     }
-    
-    # Django Admin
-    location /admin {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-    
-    # Static files
+
+    # Arquivos estáticos do Django
     location /static {
-        alias /home/txopela/txopela-tour/backend/static;
-        expires 1y;
-        add_header Cache-Control "public, immutable";
+        alias /var/www/txopela/backend/staticfiles;
     }
-    
+
     # Media files
     location /media {
-        alias /home/txopela/txopela-tour/backend/media;
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-        client_max_body_size 100M;
+        alias /var/www/txopela/backend/media;
     }
 }
 ```
 
-### 3. Ativar Site
+### 5.2. Ativar site e testar configuração
 ```bash
+# Criar link simbólico
 sudo ln -s /etc/nginx/sites-available/txopela /etc/nginx/sites-enabled/
-sudo nginx -t  # Testar configuração
+
+# Testar configuração
+sudo nginx -t
+
+# Reiniciar Nginx
 sudo systemctl restart nginx
 ```
 
-## 🚀 Configurar Gunicorn (Backend)
+## 6. CONFIGURAÇÃO DO GUNICORN (BACKEND)
 
-### 1. Criar Service do Systemd
+### 6.1. Criar serviço do Gunicorn
 ```bash
 sudo nano /etc/systemd/system/txopela.service
 ```
 
-### 2. Configuração do Service
+**Conteúdo do arquivo:**
 ```ini
 [Unit]
-Description=Txopela Tour Django Application
+Description=Txopela Tour Backend
 After=network.target
 
 [Service]
-User=txopela
+User=www-data
 Group=www-data
-WorkingDirectory=/home/txopela/txopela-tour/backend
-Environment="PATH=/home/txopela/txopela-tour/backend/venv/bin"
-ExecStart=/home/txopela/txopela-tour/backend/venv/bin/gunicorn \
-    --workers 3 \
-    --bind 127.0.0.1:8000 \
-    --access-logfile /var/log/gunicorn/access.log \
-    --error-logfile /var/log/gunicorn/error.log \
-    txopela_backend.wsgi:application
+WorkingDirectory=/var/www/txopela/backend
+Environment="PATH=/var/www/txopela/backend/venv/bin"
+ExecStart=/var/www/txopela/backend/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 txopela_backend.wsgi:application
 
 [Install]
 WantedBy=multi-user.target
 ```
 
-### 3. Iniciar Service
+### 6.2. Iniciar e habilitar o serviço
 ```bash
-# Criar diretório de logs
-sudo mkdir -p /var/log/gunicorn
-sudo chown txopela:www-data /var/log/gunicorn
-
 # Recarregar systemd
 sudo systemctl daemon-reload
 
 # Iniciar serviço
 sudo systemctl start txopela
+
+# Habilitar para iniciar automaticamente
 sudo systemctl enable txopela
 
 # Verificar status
 sudo systemctl status txopela
 ```
 
-## 🔐 Configurar SSL (HTTPS)
+## 7. CONFIGURAÇÃO DO SSL (OPCIONAL)
 
-### 1. Obter Certificado Let's Encrypt
+### 7.1. Instalar Certbot
 ```bash
-sudo certbot --nginx -d seu-dominio.com -d www.seu-dominio.com
+sudo apt install certbot python3-certbot-nginx -y
 ```
 
-### 2. Renovar Automaticamente
+### 7.2. Obter certificado SSL
 ```bash
-# Testar renovação
-sudo certbot renew --dry-run
-
-# Agendar renovação automática
-sudo crontab -e
-# Adicionar linha:
-0 12 * * * /usr/bin/certbot renew --quiet
+sudo certbot --nginx -d 75.119.133.19
 ```
 
-## 📊 Monitoramento
+## 8. TESTES FINAIS
 
-### 1. Logs
+### 8.1. Testar endpoints
 ```bash
-# Nginx logs
-sudo tail -f /var/log/nginx/txopela-access.log
-sudo tail -f /var/log/nginx/txopela-error.log
+# Testar API
+curl http://75.119.133.19/api/ai/chat/ -X POST -H "Content-Type: application/json" -d '{"messages": [{"content": "Olá"}]}'
 
-# Gunicorn logs
-sudo tail -f /var/log/gunicorn/access.log
-sudo tail -f /var/log/gunicorn/error.log
+# Testar frontend
+curl -I http://75.119.133.19/
+```
 
-# Django logs
+### 8.2. Monitorar logs
+```bash
+# Logs do Nginx
+sudo tail -f /var/log/nginx/access.log
+sudo tail -f /var/log/nginx/error.log
+
+# Logs do Gunicorn
 sudo journalctl -u txopela -f
 ```
 
-### 2. Status dos Serviços
-```bash
-# Verificar status
-sudo systemctl status nginx
-sudo systemctl status txopela
-sudo systemctl status postgresql  # ou mysql
-sudo systemctl status redis
+## 9. COMANDOS ÚTEIS
 
-# Reiniciar serviços
-sudo systemctl restart nginx
+### 9.1. Reiniciar serviços
+```bash
+# Reiniciar backend
 sudo systemctl restart txopela
+
+# Reiniciar Nginx
+sudo systemctl restart nginx
+
+# Reiniciar tudo
+sudo systemctl restart txopela nginx
 ```
 
-## 🔄 Deploy Automático
-
-### 1. Script de Deploy
+### 9.2. Atualizar aplicação
 ```bash
-nano /home/txopela/deploy.sh
-```
-
-```bash
-#!/bin/bash
-echo "Iniciando deploy do Txopela Tour..."
-
-# Atualizar código
-cd /home/txopela/txopela-tour
-git pull origin main
+cd /var/www/txopela
+git pull origin master
 
 # Backend
 cd backend
@@ -300,207 +339,67 @@ source venv/bin/activate
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py collectstatic --noinput
-deactivate
-
-# Business App
-cd ../business-app
-npm install --production
-npm run build
-
-# Client App
-cd ../frontend-vite
-npm install --production
-npm run build
-
-# Reiniciar serviços
 sudo systemctl restart txopela
-sudo systemctl reload nginx
 
-echo "Deploy concluído!"
+# Frontends
+cd ../frontend-vite
+npm run build
+
+cd ../admin-app
+npm run build
+
+cd ../business-app
+npm run build
 ```
 
-### 2. Tornar Executável
+### 9.3. Backup
 ```bash
-chmod +x /home/txopela/deploy.sh
+# Backup do banco de dados
+cd /var/www/txopela/backend
+source venv/bin/activate
+python manage.py dumpdata > backup_$(date +%Y%m%d).json
 ```
 
-## 🐛 Troubleshooting
+## 10. SOLUÇÃO DE PROBLEMAS
 
-### Problemas Comuns
+### 10.1. Erros comuns
 
-#### 1. Erro 502 Bad Gateway
+**API não responde:**
 ```bash
-# Verificar Gunicorn
+# Verificar se o Gunicorn está rodando
 sudo systemctl status txopela
-sudo journalctl -u txopela -f
 
-# Verificar portas
+# Verificar porta 8000
 sudo netstat -tlnp | grep 8000
 ```
 
-#### 2. Erro de Permissão
+**Frontend não carrega:**
 ```bash
-# Corrigir permissões
-sudo chown -R txopela:www-data /home/txopela/txopela-tour
-sudo chmod -R 755 /home/txopela/txopela-tour
+# Verificar build
+ls -la /var/www/txopela/frontend-vite/dist/
+
+# Verificar permissões
+sudo chown -R www-data:www-data /var/www/txopela
 ```
 
-#### 3. Banco de Dados
+**Erros no Nginx:**
 ```bash
-# PostgreSQL
-sudo -u postgres psql
-# Criar database
-CREATE DATABASE txopela;
-CREATE USER txopela_user WITH PASSWORD 'sua_senha';
-GRANT ALL PRIVILEGES ON DATABASE txopela TO txopela_user;
-\q
-```
+# Testar configuração
+sudo nginx -t
 
-#### 4. SSL não funciona
-```bash
-# Verificar certificado
-sudo certbot certificates
-# Renovar
-sudo certbot renew --force-renewal
-```
-
-## 📈 Otimizações
-
-### 1. Otimizar Nginx
-```bash
-sudo nano /etc/nginx/nginx.conf
-```
-```nginx
-# Adicionar no http block
-gzip on;
-gzip_vary on;
-gzip_min_length 1024;
-gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;
-```
-
-### 2. Otimizar Gunicorn
-```bash
-sudo nano /etc/systemd/system/txopela.service
-```
-```ini
-# Ajustar workers baseado em CPU
---workers $((2 * $(nproc) + 1))
-```
-
-### 3. Cache Redis
-```bash
-# Instalar Redis
-sudo apt install redis-server
-
-# Configurar Django para usar Redis
-# Adicionar em settings.py
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        }
-    }
-}
-```
-
-## 🔧 Backup
-
-### 1. Script de Backup
-```bash
-nano /home/txopela/backup.sh
-```
-
-```bash
-#!/bin/bash
-BACKUP_DIR="/home/txopela/backups"
-DATE=$(date +%Y%m%d_%H%M%S)
-
-# Criar diretório
-mkdir -p $BACKUP_DIR
-
-# Backup do banco de dados
-sudo -u postgres pg_dump txopela > $BACKUP_DIR/txopela_db_$DATE.sql
-
-# Backup de arquivos
-tar -czf $BACKUP_DIR/txopela_files_$DATE.tar.gz \
-    /home/txopela/txopela-tour/backend/media \
-    /home/txopela/txopela-tour/backend/.env
-
-# Manter apenas últimos 7 backups
-find $BACKUP_DIR -type f -mtime +7 -delete
-
-echo "Backup concluído: $BACKUP_DIR/txopela_$DATE"
-```
-
-### 2. Agendar Backup Diário
-```bash
-sudo crontab -e
-# Adicionar linha:
-0 2 * * * /home/txopela/backup.sh
-```
-
-## 🎯 Verificação Final
-
-### Testar Tudo
-```bash
-# 1. Testar API
-curl http://localhost:8000/api/health/
-
-# 2. Testar Client App
-curl -I http://localhost/
-
-# 3. Testar Business App
-curl -I http://localhost/business
-
-# 4. Testar SSL
-curl -I https://seu-dominio.com
-```
-
-### Monitorar Recursos
-```bash
-# CPU e Memória
-htop
-
-# Rede
-iftop
-
-# Discos
-df -h
-```
-
-## 📞 Suporte
-
-### Logs Importantes
-- `/var/log/nginx/` - Logs do Nginx
-- `/var/log/gunicorn/` - Logs do Gunicorn
-- `/var/log/syslog` - Logs do sistema
-- `journalctl -u txopela` - Logs da aplicação
-
-### Comandos Úteis
-```bash
-# Reiniciar tudo
-sudo systemctl restart nginx txopela
-
-# Verificar erros
+# Verificar logs
 sudo tail -f /var/log/nginx/error.log
-
-# Limpar cache
-sudo systemctl restart redis
 ```
+
+### 10.2. Contatos
+- **IP do VPS:** 75.119.133.19
+- **Portas abertas:** 80 (HTTP), 443 (HTTPS), 22 (SSH)
+- **URLs:**
+  - App Cliente: http://75.119.133.19
+  - Admin: http://75.119.133.19/admin
+  - Business: http://75.119.133.19/business
+  - API: http://75.119.133.19/api
 
 ---
 
-**Pronto!** Sua plataforma Txopela Tour está configurada no VPS e pronta para produção. 🚀
-
-**URLs:**
-- Client App: https://seu-dominio.com
-- Business App: https://seu-dominio.com/business
-- API: https://seu-dominio.com/api
-- Admin: https://seu-dominio.com/admin
-
-**Credenciais padrão admin:**
-- Usuário: admin
-- Email: admin@txopela.com
-- Senha: (definida durante instalação)
+**NOTA:** Substitua `[URL_DO_SEU_REPOSITORIO]` pela URL real do seu repositório Git (GitHub, GitLab, Bitbucket, etc.).
