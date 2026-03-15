@@ -91,12 +91,18 @@ SIMPLE_JWT = {
 }
 
 # CORS Settings
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'http://localhost:3001',  # Admin App
-    'http://localhost:5174',  # Business App
-]
+cors_origins_env = os.getenv('CORS_ALLOWED_ORIGINS', '')
+if cors_origins_env:
+    # Produção: ler da variável de ambiente
+    CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins_env.split(',') if origin.strip()]
+else:
+    # Desenvolvimento: usar localhost
+    CORS_ALLOWED_ORIGINS = [
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'http://localhost:3001',  # Admin App
+        'http://localhost:5174',  # Business App
+    ]
 CORS_ALLOW_CREDENTIALS = True
 
 # Gemini AI
