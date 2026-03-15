@@ -6,16 +6,37 @@ Script para testar a API no Render
 import requests
 import json
 
-# URL da API (altere quando tiver a URL do Render)
-API_URL = "https://txopela-api.onrender.com/api"
+# URL da API no Render
+BASE_URL = "https://txopela-api.onrender.com"
+API_URL = f"{BASE_URL}/api"
 # Para testar localmente, use:
-# API_URL = "http://localhost:8000/api"
+# BASE_URL = "http://localhost:8000"
+# API_URL = f"{BASE_URL}/api"
+
+def test_root():
+    """Testa o endpoint raiz"""
+    print("🔍 Testando endpoint raiz (/)...")
+    try:
+        response = requests.get(BASE_URL, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            print("✅ Endpoint raiz funcionando!")
+            print(f"📝 Status: {data.get('status')}")
+            print(f"📝 Endpoints disponíveis: {list(data.get('endpoints', {}).keys())}")
+            return True
+        else:
+            print(f"❌ Raiz retornou status {response.status_code}")
+            print(f"📝 Resposta: {response.text[:200]}")
+            return False
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Erro ao conectar: {e}")
+        return False
 
 def test_health():
     """Testa se a API está online"""
-    print("🔍 Testando saúde da API...")
+    print("\n🔍 Testando saúde da API...")
     try:
-        response = requests.get(f"{API_URL}/health/", timeout=10)
+        response = requests.get(f"{API_URL}/ai/health/", timeout=10)
         if response.status_code == 200:
             print("✅ API está online!")
             return True
@@ -59,15 +80,18 @@ def test_pontos():
     """Testa o endpoint de pontos turísticos"""
     print("\n🔍 Testando endpoint de pontos turísticos...")
     try:
-        response = requests.get(f"{API_URL}/pontos/", timeout=10)
+        response = requests.get(f"{API_URL}/pontos-turisticos/", timeout=10)
         
         if response.status_code == 200:
             data = response.json()
             print(f"✅ Pontos turísticos funcionando!")
             print(f"📊 Total de pontos: {len(data)}")
+            if len(data) > 0:
+                print(f"📝 Exemplo: {data[0].get('nome', 'N/A')}")
             return True
         else:
             print(f"❌ Pontos retornou status {response.status_code}")
+            print(f"📝 Resposta: {response.text[:200]}")
             return False
     except requests.exceptions.RequestException as e:
         print(f"❌ Erro ao testar pontos: {e}")
@@ -103,9 +127,10 @@ def main():
     print()
     
     results = {
+        "root": test_root(),
         "health": test_health(),
-        "chat": test_chat(),
         "pontos": test_pontos(),
+        "chat": test_chat(),
         "cors": test_cors()
     }
     

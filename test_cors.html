@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste CORS - Txopela API</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .loading {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        .endpoint {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste CORS - Txopela API</h1>
+        
+        <div class="info">
+            <strong>ℹ️ Informação:</strong><br>
+            Este teste verifica se o CORS está configurado corretamente na API do Render.
+        </div>
+
+        <h2>Endpoints para Testar:</h2>
+        
+        <div class="endpoint">
+            <strong>1. Pontos Turísticos</strong><br>
+            <code>GET /api/pontos-turisticos/</code>
+            <button onclick="testEndpoint('pontos')">Testar</button>
+        </div>
+
+        <div class="endpoint">
+            <strong>2. Categorias</strong><br>
+            <code>GET /api/pontos-turisticos/categorias/</code>
+            <button onclick="testEndpoint('categorias')">Testar</button>
+        </div>
+
+        <div class="endpoint">
+            <strong>3. AI Health</strong><br>
+            <code>GET /api/ai/health/</code>
+            <button onclick="testEndpoint('ai-health')">Testar</button>
+        </div>
+
+        <div class="endpoint">
+            <strong>4. AI Chat</strong><br>
+            <code>POST /api/ai/chat/</code>
+            <button onclick="testEndpoint('ai-chat')">Testar</button>
+        </div>
+
+        <button onclick="testAll()" style="background: #007bff; margin-top: 20px;">
+            🚀 Testar Todos
+        </button>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://txopela-api.onrender.com';
+        const resultDiv = document.getElementById('result');
+
+        function showResult(message, type = 'info') {
+            resultDiv.innerHTML = `<div class="result ${type}">${message}</div>`;
+        }
+
+        async function testEndpoint(endpoint) {
+            showResult('⏳ Testando...', 'loading');
+
+            const endpoints = {
+                'pontos': {
+                    url: `${API_URL}/api/pontos-turisticos/`,
+                    method: 'GET'
+                },
+                'categorias': {
+                    url: `${API_URL}/api/pontos-turisticos/categorias/`,
+                    method: 'GET'
+                },
+                'ai-health': {
+                    url: `${API_URL}/api/ai/health/`,
+                    method: 'GET'
+                },
+                'ai-chat': {
+                    url: `${API_URL}/api/ai/chat/`,
+                    method: 'POST',
+                    body: JSON.stringify({
+                        messages: [{ content: 'Olá' }]
+                    })
+                }
+            };
+
+            const config = endpoints[endpoint];
+
+            try {
+                const options = {
+                    method: config.method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+
+                if (config.body) {
+                    options.body = config.body;
+                }
+
+                const response = await fetch(config.url, options);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult(
+                        `✅ SUCESSO!\n\n` +
+                        `Endpoint: ${config.url}\n` +
+                        `Status: ${response.status}\n` +
+                        `CORS: ✅ Funcionando\n\n` +
+                        `Resposta:\n${JSON.stringify(data, null, 2).substring(0, 500)}...`,
+                        'success'
+                    );
+                } else {
+                    showResult(
+                        `⚠️ RESPOSTA COM ERRO\n\n` +
+                        `Endpoint: ${config.url}\n` +
+                        `Status: ${response.status}\n` +
+                        `CORS: ✅ Funcionando (mas API retornou erro)\n\n` +
+                        `Mensagem: ${response.statusText}`,
+                        'error'
+                    );
+                }
+            } catch (error) {
+                if (error.message.includes('CORS') || error.message.includes('Network')) {
+                    showResult(
+                        `❌ ERRO DE CORS!\n\n` +
+                        `Endpoint: ${config.url}\n` +
+                        `Erro: ${error.message}\n\n` +
+                        `🔧 SOLUÇÃO:\n` +
+                        `1. Acesse: https://dashboard.render.com\n` +
+                        `2. Serviço: txopela-api\n` +
+                        `3. Environment → CORS_ALLOWED_ORIGINS\n` +
+                        `4. Adicione: ${window.location.origin}\n` +
+                        `5. Ou use: https://txopela-tour.vercel.app`,
+                        'error'
+                    );
+                } else {
+                    showResult(
+                        `❌ ERRO\n\n` +
+                        `Endpoint: ${config.url}\n` +
+                        `Erro: ${error.message}`,
+                        'error'
+                    );
+                }
+            }
+        }
+
+        async function testAll() {
+            showResult('⏳ Testando todos os endpoints...', 'loading');
+            
+            const results = [];
+            const endpoints = ['pontos', 'categorias', 'ai-health', 'ai-chat'];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const config = {
+                        'pontos': { url: `${API_URL}/api/pontos-turisticos/`, method: 'GET' },
+                        'categorias': { url: `${API_URL}/api/pontos-turisticos/categorias/`, method: 'GET' },
+                        'ai-health': { url: `${API_URL}/api/ai/health/`, method: 'GET' },
+                        'ai-chat': { 
+                            url: `${API_URL}/api/ai/chat/`, 
+                            method: 'POST',
+                            body: JSON.stringify({ messages: [{ content: 'Olá' }] })
+                        }
+                    }[endpoint];
+
+                    const options = {
+                        method: config.method,
+                        headers: { 'Content-Type': 'application/json' }
+                    };
+                    if (config.body) options.body = config.body;
+
+                    const response = await fetch(config.url, options);
+                    results.push({
+                        endpoint: endpoint,
+                        url: config.url,
+                        status: response.status,
+                        ok: response.ok
+                    });
+                } catch (error) {
+                    results.push({
+                        endpoint: endpoint,
+                        error: error.message
+                    });
+                }
+            }
+
+            const allSuccess = results.every(r => r.ok);
+            const summary = results.map(r => {
+                if (r.error) {
+                    return `❌ ${r.endpoint}: ERRO (${r.error})`;
+                }
+                return `${r.ok ? '✅' : '⚠️'} ${r.endpoint}: ${r.status}`;
+            }).join('\n');
+
+            showResult(
+                `📊 RESULTADO DOS TESTES\n\n${summary}\n\n` +
+                (allSuccess 
+                    ? '🎉 Todos os testes passaram! CORS está funcionando corretamente!'
+                    : '⚠️ Alguns testes falharam. Verifique a configuração do CORS.'),
+                allSuccess ? 'success' : 'error'
+            );
+        }
+
+        // Teste automático ao carregar
+        window.onload = () => {
+            showResult(
+                '👋 Bem-vindo ao Teste de CORS!\n\n' +
+                'Clique em um dos botões acima para testar os endpoints.\n\n' +
+                'Ou clique em "Testar Todos" para verificar tudo de uma vez.',
+                'info'
+            );
+        };
+    </script>
+</body>
+</html>
