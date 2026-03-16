@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Eye, Heart, Bookmark, MessageCircle, Share2, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Eye, Heart, Bookmark, Share2 } from 'lucide-react';
 import { pontosService } from '../services/api';
 import type { PontoTuristico } from '../types';
 import AnalyticsCard from '../components/AnalyticsCard';
@@ -28,12 +28,6 @@ export default function PointAnalytics() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const calculateAverageRating = () => {
-    if (!point?.reviews || point.reviews.length === 0) return 0;
-    const sum = point.reviews.reduce((acc, review) => acc + review.rating, 0);
-    return (sum / point.reviews.length).toFixed(1);
   };
 
   if (loading) {
@@ -71,27 +65,31 @@ export default function PointAnalytics() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <AnalyticsCard
             title="Visualizações"
-            value={point.analytics?.views || 0}
+            value={0}
             icon={Eye}
-            trend={12}
+            color="bg-blue-500"
+            trend={{ value: 12, isPositive: true }}
           />
           <AnalyticsCard
             title="Curtidas"
-            value={point.analytics?.likes || 0}
+            value={0}
             icon={Heart}
-            trend={8}
+            color="bg-red-500"
+            trend={{ value: 8, isPositive: true }}
           />
           <AnalyticsCard
             title="Salvos"
-            value={point.analytics?.saves || 0}
+            value={0}
             icon={Bookmark}
-            trend={-3}
+            color="bg-green-500"
+            trend={{ value: 3, isPositive: false }}
           />
           <AnalyticsCard
             title="Compartilhamentos"
-            value={point.analytics?.shares || 0}
+            value={0}
             icon={Share2}
-            trend={15}
+            color="bg-purple-500"
+            trend={{ value: 15, isPositive: true }}
           />
         </div>
 

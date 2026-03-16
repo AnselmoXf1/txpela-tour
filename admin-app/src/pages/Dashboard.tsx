@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { MapPin, Users, Star, MessageCircle } from 'lucide-react';
+import { MapPin, Star, MessageCircle } from 'lucide-react';
 import { pontosService } from '../services/api';
 import type { Stats } from '../types';
 

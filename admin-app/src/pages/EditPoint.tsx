@@ -81,168 +81,168 @@ export default function EditPoint() {
 
     setSaving(true);
     try {
+      const lng = parseFloat(formData.longitude);
+      const lat = parseFloat(formData.latitude);
+      
       const updateData = {
         nome: formData.nome,
         descricao: formData.descricao,
         categoria: formData.categoria,
-        localizacao: {
+        lo
           type: 'Point' as const,
-          coordinates: [parseFloat(formData.longitude), parseFloat(formData.latitude)]
+          coordinates: [lng, lat] as [number, number]
         },
-        preco_medio: formData.preco_medio ? parseFloat(formData.preco_medio) : undefined,
-        horario_funcionamento: formData.horario_funcionamento,
+        ndefined,
+,
         contato: formData.contato,
       };
 
-      await pontosService.update(id!, updateData);
+      await pontosS;
       alert('Ponto turístico atualizado com sucesso!');
       navigate('/points');
-    } catch (err) {
-      console.error('Erro ao atualizar ponto:', err);
-      alert('Erro ao atualizar ponto turístico');
-    } finally {
-      setSaving(false);
+    } catch (er
+      console.error('Errr);
+     o');
+    
+);
     }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-ocean border-t-transparent"></div>
-      </div>
+      ">
+   ></div>
+
     );
   }
 
   if (!ponto) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-600">Ponto turístico não encontrado</p>
-      </div>
+      ">
+   do</p>
+>
     );
   }
 
   return (
     <div>
-      <button
-        onClick={() => navigate('/points')}
-        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
+      <utton
+        onClick={() => navigate
+        classN
       >
-        <ArrowLeft size={20} />
+={20} />
         Voltar
       </button>
 
-      <div className="mb-8">
-        <h1 className="text-3xl font-heading font-bold text-gray-900 mb-2">Editar Ponto Turístico</h1>
+      <div c
+o</h1>
         <p className="text-gray-600">Atualize os dados do ponto turístico</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        {/* Informações Básicas */}
-        <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Informações Básicas</h2>
+      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border bor">
+        <d8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Inh2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div class">
+              <label cb-2">
                 Nome *
               </label>
               <input
                 type="text"
                 name="nome"
                 value={formData.nome}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ocean focus:border-transparent"
-                required
-              />
+                onChange
+                ent"
+                red
+
             </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Descrição *
+            <div className=>
+              <label c2">
+                Descriço *
               </label>
               <textarea
                 name="descricao"
-                value={formData.descricao}
+                value={fo}
                 onChange={handleInputChange}
                 rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ocean focus:border-transparent"
-                required
-              />
+                
+                rered
+ />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Categoria *
+              <label cb-2">
+                Categ*
               </label>
               <select
                 name="categoria"
                 value={formData.categoria}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ocean focus:border-transparent"
+               
+                className="w-full px-4 p"
               >
-                {CATEGORIAS.map(cat => (
-                  <option key={cat.value} value={cat.value}>{cat.label}</option>
+                {CA (
+                  <optiption>
                 ))}
-              </select>
-            </div>
+elect>
+            </div
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Preço Médio (R$)
+              <label c">
+                Preç$)
               </label>
               <input
                 type="number"
                 name="preco_medio"
-                value={formData.preco_medio}
+                value={formedio}
                 onChange={handleInputChange}
-                step="0.01"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ocean focus:border-transparent"
+                .01"
+                cl
               />
-            </div>
-          </div>
+            </
+
         </div>
 
-        {/* Localização */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <MapPin size={20} />
-            Localização
-          </h2>
+          <h2 className="text-xl-2">
+            <MapPin siz/>
+            Locação
+          >
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div clp-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label class
                 Latitude *
               </label>
               <input
                 type="number"
                 name="latitude"
                 value={formData.latitude}
-                onChange={handleInputChange}
+                onChange={e}
                 step="any"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ocean focus:border-transparent"
-                required
+                classNamt"
+                uired
               />
-            </div>
+div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Longitude *
+              <label classN">
+                Longit
               </label>
               <input
                 type="number"
                 name="longitude"
                 value={formData.longitude}
-                onChange={handleInputChange}
+                onChange={ge}
                 step="any"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ocean focus:border-transparent"
-                required
+                classNamparent"
+                d
               />
             </div>
           </div>
-        </div>
+  </div>
 
-        {/* Contato */}
         <div className="mb-8">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Contato e Horário</h2>
           
@@ -277,29 +277,27 @@ export default function EditPoint() {
           </div>
         </div>
 
-        {/* Nota sobre imagens */}
-        <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="mb-8 p-4 b">
           <p className="text-sm text-blue-800">
-            <strong>Nota:</strong> Para editar as imagens deste ponto, use o botão de edição de fotos na lista de pontos turísticos.
+            <strong>Nota:</strong> Para editar os.
           </p>
         </div>
 
-        {/* Botões */}
-        <div className="flex justify-end gap-4">
+">
           <button
             type="button"
-            onClick={() => navigate('/points')}
-            className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium"
+            onClints')}
+            className="pxmedium"
           >
             Cancelar
-          </button>
+          <button>
           <button
-            type="submit"
-            disabled={saving}
-            className="bg-ocean text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 transition disabled:opacity-50 flex items-center gap-2"
+            type="sit"
+            disab}
+            className="bgp-2"
           >
             <Save size={20} />
-            {saving ? 'Salvando...' : 'Salvar Alterações'}
+           }
           </button>
         </div>
       </form>
