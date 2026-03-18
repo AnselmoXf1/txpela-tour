@@ -23,18 +23,54 @@ interface MozambiqueMapProps {
   initialZoom?: number;
   showProvinces?: boolean;
   interactive?: boolean;
+  height?: string;
+  showStyleSelector?: boolean;
+  points?: Array<{
+    id: string;
+    nome: string;
+    localizacao: { coordinates: [number, number] };
+    categoria: string;
+  }>;
 }
+
+// Estilos de mapa disponíveis
+const MAP_STYLES = {
+  voyager: {
+    name: 'Voyager',
+    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+  },
+  dark: {
+    name: 'Dark Matter',
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+  },
+  light: {
+    name: 'Positron',
+    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+  },
+  satellite: {
+    name: 'Satélite',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Tiles &copy; Esri'
+  }
+};
 
 const MozambiqueMap: React.FC<MozambiqueMapProps> = ({
   onLocationSelect,
-  initialCenter = [-18.665, 35.529], // Centro de Moçambique
+  initialCenter = [-18.665, 35.529],
   initialZoom = 6,
   showProvinces = true,
   interactive = true,
+  height = '500px',
+  showStyleSelector = false,
+  points = [],
 }) => {
   const [provinces, setProvinces] = useState<Province[]>([]);
   const [selectedProvince, setSelectedProvince] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [mapStyle, setMapStyle] = useState<keyof typeof MAP_STYLES>('voyager');
 
   useEffect(() => {
     loadProvinces();
@@ -82,23 +118,24 @@ const MozambiqueMap: React.FC<MozambiqueMapProps> = ({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
+      <div className="flex items-center justify-center" style={{ height: height || '500px' }}>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full" style={{ height: height || '500px' }}>
       <MapContainer
         center={initialCenter}
         zoom={initialZoom}
         className="h-full w-full rounded-lg shadow-lg"
-        style={{ height: '500px', width: '100%' }}
+        style={{ height: '100%', width: '100%' }}
       >
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url={MAP_STYLES[mapStyle].url}
+          attribution={MAP_STYLES[mapStyle].attribution}
+          maxZoom={19}
         />
         
         <MapEvents />
